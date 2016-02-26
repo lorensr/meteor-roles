@@ -3,7 +3,7 @@
   "use strict";
 
   var users,
-      roles = ['admin','editor','user']
+      roles = ['admin', 'editor', 'user']
 
   users = {
     'eve': {
@@ -22,6 +22,17 @@
       roles: {
         '__global_roles__': ['admin'],
         'group1': ['editor']
+      }
+    },
+    'alice': {
+      _id: 'alice',
+      roles: {
+        'group1': ['user'],
+        'group2': ['user', 'editor']
+      },
+      fullRoles: {
+        'group1': ['user', 'editor'],
+        'group2': ['user', 'editor', 'admin']
       }
     }
   }
@@ -44,15 +55,16 @@
   }
 
 
-  // Mock Meteor.user() for isInRole handlebars helper testing
+  // Mock Meteor.user() for handlebars helper testing
   Meteor.user = function () {
-    return users.eve
+    return users.alice
   }
 
   Tinytest.add(
-    'roles - can check current users roles via template helper', 
+    "roles - can check current user's roles via template helpers",
     function (test) {
       var isInRole,
+          isInFullRole,
           expected,
           actual
 
@@ -66,33 +78,48 @@
       test.equal(typeof isInRole, 'function', "'isInRole' helper not registered")
 
       expected = true
-      actual = isInRole('admin, editor')
+      actual = isInRole('user', 'group1')
       test.equal(actual, expected)
-      
-      expected = true
-      actual = isInRole('admin')
+
+      expected = false
+      actual = isInRole('admin', 'group1')
       test.equal(actual, expected)
 
       expected = false
       actual = isInRole('unknown')
       test.equal(actual, expected)
+
+      isInFullRole = Roles._handlebarsHelpers.isInFullRole
+      test.equal(typeof isInFullRole, 'function', "'isInFullRole' helper not registered")
+
+      expected = true
+      actual = isInFullRole('user,editor', 'group1')
+      test.equal(actual, expected)
+
+      expected = false
+      actual = isInFullRole('admin', 'group1')
+      test.equal(actual, expected)
+
+      expected = true
+      actual = isInFullRole('admin', 'group2')
+      test.equal(actual, expected)
     })
 
   Tinytest.add(
-    'roles - can check if user is in role', 
+    'roles - can check if user is in role',
     function (test) {
       testUser(test, 'eve', ['admin', 'editor'])
     })
 
   Tinytest.add(
-    'roles - can check if user is in role by group', 
+    'roles - can check if user is in role by group',
     function (test) {
       testUser(test, 'bob', ['user'], 'group1')
       testUser(test, 'bob', ['editor'], 'group2')
     })
 
   Tinytest.add(
-    'roles - can check if user is in role with Roles.GLOBAL_GROUP', 
+    'roles - can check if user is in role with Roles.GLOBAL_GROUP',
     function (test) {
       testUser(test, 'joe', ['admin'])
       testUser(test, 'joe', ['admin'], Roles.GLOBAL_GROUP)
@@ -100,7 +127,7 @@
     })
 
   Tinytest.add(
-    'roles - can get all roles for user by group with periods in name', 
+    'roles - can get all roles for user by group with periods in name',
     function (test) {
       Roles.addUsersToRoles(users.joe, ['admin'], 'example.k12.va.us')
       test.equal(Roles.getRolesForUser(users.joe, 'example.k12.va.us'), ['admin'])
