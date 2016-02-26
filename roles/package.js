@@ -23,6 +23,7 @@ Package.onUse(function (api) {
   api.addFiles('roles_server.js', 'server');
   api.addFiles('roles_common.js', both);
   api.addFiles(['client/debug.js',
+                'client/roles.js',
                 'client/uiHelpers.js',
                 'client/subscriptions.js'], 'client');
 });

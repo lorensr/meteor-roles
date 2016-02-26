@@ -133,4 +133,17 @@
       test.equal(Roles.getRolesForUser(users.joe, 'example.k12.va.us'), ['admin'])
     })
 
+  Tinytest.addAsync(
+    'roles - can login with token',
+    function (test, next) {
+      test.isNull(Meteor.userId())
+
+      Roles.loginWithToken('a', function (e, userId) {
+        test.isFalse(e)
+        test.equal(userId, 'foo')
+        test.equal(Meteor.userId(), 'foo')
+        next()
+      })
+    })
+
 }());
