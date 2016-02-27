@@ -715,18 +715,6 @@ function strContains (haystack, needle) {
 
 Meteor.methods({
 
-  'alanning:roles/loginWithToken': function (token) {
-    var userId
-
-    check(token, String)
-
-    userId = 'foo'
-
-    this.setUserId(userId)
-
-    return userId
-  }
-
 }) // end Meteor.methods
 
 }());

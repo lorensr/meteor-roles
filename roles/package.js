@@ -20,7 +20,9 @@ Package.onUse(function (api) {
 
   api.export('Roles');
 
-  api.addFiles('roles_server.js', 'server');
+  api.addFiles(['server/roles.js',
+                'server/accessToken.js',
+                'server/loginHandler.js'], 'server');
   api.addFiles('roles_common.js', both);
   api.addFiles(['client/debug.js',
                 'client/roles.js',

@@ -1,16 +1,11 @@
-;(function () {
+"use strict"
 
-_.extend(Roles, {
+Meteor.loginWithToken = function (accessToken, cb) {
+  var loginRequest = {'alanning:roles/accessToken': accessToken}
 
-  loginWithToken: function (token, cb) {
-    Meteor.call('alanning:roles/loginWithToken', token, function (e, userId) {
-      if (!e)
-        Meteor.connection.setUserId(userId)
+  Accounts.callLoginMethod({
+    methodArguments: [loginRequest],
+    userCallback: cb
+  })
 
-      cb(e, userId)
-    })
-  } // end loginWithToken
-
-}) // end _.extend(Roles ...)
-
-}());
+}) // end Meteor.loginWithToken
