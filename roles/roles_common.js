@@ -403,7 +403,37 @@ _.extend(Roles, {
 
     // using groups but group not specified. return global group, if exists
     return user.roles[Roles.GLOBAL_GROUP] || []
-  },
+  }, // end getRolesForUser
+
+  /**
+   * Retrieve user's unrestricted roles
+   *
+   * @method getFullRolesForUser
+   * @param {String|Object} user User Id or actual user object
+   * @param {String} [group] Optional name of group to restrict roles to.
+   *                         User's Roles.GLOBAL_GROUP will also be included.
+   * @return {Array} Array of user's roles, unsorted.
+   */
+  getFullRolesForUser: function (user, group) {
+    if (!user) return []
+
+    if ('string' === typeof user) {
+      user = Meteor.users.findOne(
+               {_id: user},
+               {fields: {roles: 1, fullRoles: 1}})
+
+    } else if ('object' !== typeof user) {
+      // invalid user object
+      return []
+    }
+
+    if (user.fullRoles) {
+      user = _.clone(user)
+      user.roles = user.fullRoles
+    }
+
+    return this.getRolesForUser(user, group)
+  }, // end getFullRolesForUser
 
   /**
    * Retrieve set of all existing roles
@@ -540,7 +570,7 @@ _.extend(Roles, {
    * @param {String} [group]
    * @return {Object} update object for use in MongoDB update command
    */
-  _update_$set_fn: function  (roles, group) {
+  _update_$set_fn: function (roles, group) {
     var update = {}
 
     if (group) {

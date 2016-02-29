@@ -19,26 +19,27 @@ Accounts.registerLoginHandler(function (loginRequest) {
   fields = {
     _id: 1,
     roles: 1,
-    'services.roles.accessTokens': {
+    fullRoles: 1,
+    'services.accessTokens.tokens': {
       $elemMatch: {hashedToken: hashedToken}
     }
   }
 
   user = Meteor.users.findOne({
-    'services.roles.accessTokens.hashedToken': hashedToken
+    'services.accessTokens.tokens.hashedToken': hashedToken
   }, fields)
 
   if (!user)
     throw new Meteor.Error('alanning:roles/token-not-found')
 
-  accessToken = new AccessToken(user.services.roles.tokens[0])
+  accessToken = new AccessToken(user.services.accessTokens.tokens[0])
 
   if (accessToken.isExpired())
     throw new Meteor.Error('alanning:roles/token-expired',
                            accessToken.expirationReason())
 
   if (accessToken.isRestricted())
-    Roles._restrictAccess(accessToken)
+    Roles._restrictAccess(user, accessToken)
 
   return {userId: user._id}
 })
